@@ -54,7 +54,7 @@ var Paddle = function() {
 	this.x = 0;
 	this.y = 0;
 	this.color = "#000000";
-	this.speed = 8;
+	this.speed = 10;
 	
 }
 
