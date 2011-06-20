@@ -4,8 +4,46 @@ function log(msg) {
 	}
 }
 
-var View = function(ctx) {
-	var context = ctx;
+
+//	This class will be the base class for CanvasView, Collision Detector
+//	and any other objects that need the Observer pattern
+
+var Observer = function() {
+
+	var objects = [];
+	
+	var registerObject = function(obj) {
+		var numberOfObjects = objects.length;
+		for(var i=0; i<numberOfObjects; i++) {
+			if(obj === objects[i]) {
+				log(obj.toString() + " has already been registered");
+				return false;
+			}
+		}
+		objects.push(obj);
+	};
+	
+	var unregisterObject = function(obj) {
+		var numberOfObjects = objects.length;
+		for(var i=0; i<numberOfObjects; i++) {
+			if(obj === objects[i]) {
+				return objects.splice(i, 1);
+			}
+		}
+	};
+	
+	return {
+		registerObject : registerObject,
+		unregisterObject : unregisterObject
+	};
+	
+}
+
+
+
+
+var CanvasView = function(ctx) {
+	var ctx = ctx;
 
 	var objects = [];
 	
@@ -30,14 +68,50 @@ var View = function(ctx) {
 	};
 	
 	var draw = function() {
-		context.clearRect(0, 0, context.canvas.clientWidth, context.canvas.clientHeight);
+		ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
 		for(var i=0; i<objects.length; i++) {
-			objects[i].draw(context);
+			if(objects[i] instanceof Player) {
+				drawPlayer(objects[i]);
+			}
+			if(objects[i] instanceof Ball) {
+				drawBall(objects[i]);
+			}
+			drawPitch();
 		}
-	}
+	};
+	
+	var drawPlayer = function(player) {
+		ctx.fillStyle = player.getColor();
+		ctx.fillRect(player.getX(), player.getY(), player.getWidth(), player.getHeight());
+	};
+	
+	var drawBall = function(ball) {
+		//draw a circle
+		ctx.beginPath();
+		ctx.arc(ball.getX(), ball.getY(), ball.getRadius(), 0, Math.PI*2, true);
+		ctx.closePath();
+		ctx.fillStyle = ball.getColor();
+		ctx.fill();	
+	};
+	
+	var drawPitch = function() {
+		// The centre line
+		ctx.fillStyle = "#000000";
+		ctx.fillRect((ctx.canvas.clientWidth/2)-3,0,5,ctx.canvas.clientHeight);
+		
+		//draw a circle
+		ctx.beginPath();
+		ctx.arc(ctx.canvas.clientWidth/2, ctx.canvas.clientHeight/2, 20, 0, Math.PI*2, true);
+		ctx.closePath();
+		ctx.lineWidth = 10;
+		ctx.strokeStyle = "#000000";
+		ctx.stroke();
+		ctx.fillStyle = "#ffffff";
+		ctx.fill();
+	};
 	
 	return {
-		ctx : context,
+		ctx : ctx,
 		registerObject : registerObject,
 		unregisterObject : unregisterObject,
 		draw : draw
@@ -68,6 +142,26 @@ Paddle.prototype = {
 			this.color = params.color || this.color;
 			this.speed = params.speed || this.speed;
 		}
+	},
+	
+	getX : function() {
+		return this.x;
+	},
+	
+	getY : function() {
+		return this.y;
+	},
+	
+	getColor : function() {
+		return this.color;
+	},
+	
+	getWidth : function() {
+		return this.width;
+	},
+	
+	getHeight : function() {
+		return this.height;
 	},
 	
 	draw : function(ctx) {
@@ -140,16 +234,21 @@ function Ball() {
 }
 
 Ball.prototype = {
-
-	//	Draw the ball on the canvas
-	draw : function(ctx) {
-		//draw a circle
-		ctx.beginPath();
-		ctx.arc(this.x, this.y, this.radius, 0, Math.PI*2, true);
-		ctx.closePath();
-		ctx.fillStyle = this.color;
-		ctx.fill();
-		//this.sparkle();
+	
+	getX : function() {
+		return this.x;
+	},
+	
+	getY : function() {
+		return this.y;
+	},
+	
+	getRadius : function() {
+		return this.radius;
+	},
+	
+	getColor : function() {
+		return this.color;
 	},
 
 	//	This function accepts an array of obstacles. It iterates through each object
@@ -158,7 +257,7 @@ Ball.prototype = {
 	move : function(obstacles) {
 		//	This makes the ball bounce off the top or bottom
 		if(this.y <= 0 || this.y >= 400) {
-			this.flash();
+			//this.flash();
 			this.dy = (-this.dy);
 		}
 		//	Move the ball...
@@ -167,7 +266,7 @@ Ball.prototype = {
 	},
 	
 	collide : function(obj, ctx) {
-		this.flash(ctx);
+		//this.flash(ctx);
 		this.reverse();
 	},
 	
@@ -277,9 +376,24 @@ function Player(uniqueID, startPos, params) {
 
 Player.prototype = {
 
-	draw : function(context) {
-		this.paddle.draw(context);
-		return this;
+	getX : function() {
+		return this.paddle.getX();
+	},
+
+	getY : function() {
+		return this.paddle.getY();
+	},
+
+	getWidth : function() {
+		return this.paddle.getWidth();
+	},
+
+	getHeight : function() {
+		return this.paddle.getHeight();
+	},
+
+	getColor : function() {
+		return this.paddle.getColor();
 	},
 	
 	up : function() {

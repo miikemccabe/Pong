@@ -24,6 +24,7 @@ var Pong = (function() {
 	};
 	
 	var init = function() {
+	
 		ctx = document.getElementsByTagName('canvas')[0].getContext('2d');
 		
 		KeyboardControls.init(controls);
@@ -35,7 +36,7 @@ var Pong = (function() {
 		ball = new Ball();		
 		ball.centralise(ctx.canvas.clientWidth, ctx.canvas.clientHeight);
 		
-		view = new View(ctx);
+		view = new CanvasView(ctx);
 		
 		view.registerObject(p1);
 		view.registerObject(p2);
@@ -102,7 +103,6 @@ var Pong = (function() {
 			if(controls.p2_down && !controls.p2_up) {
 				p2.down();
 			}
-			drawPitch();
 			//scoreKeeper.draw(scoreKeeper.getScore());
 			if(ball) {
 				ball.move([p1, p2]);
@@ -143,24 +143,6 @@ var Pong = (function() {
 		}
 	}
 	
-	var drawPitch = function() {
-		
-		// The centre line
-		ctx.fillStyle = "#000000";
-		ctx.fillRect((ctx.canvas.clientWidth/2)-3,0,5,ctx.canvas.clientHeight);
-		
-		//draw a circle
-		ctx.beginPath();
-		ctx.arc(ctx.canvas.clientWidth/2, ctx.canvas.clientHeight/2, 20, 0, Math.PI*2, true);
-		ctx.closePath();
-		ctx.lineWidth = 10;
-		ctx.strokeStyle = "#000000";
-		ctx.stroke();
-		ctx.fillStyle = "#ffffff";
-		ctx.fill();
-	
-	}	
-	
 	var displayScores = function() {
 		log("displayScores Called");
 		$("#p1 .score").text(scoreKeeper.getScore(p1.id));
@@ -170,8 +152,7 @@ var Pong = (function() {
 	return {
 		init : init,
 		start : start,
-		pause : pause,
-		drawPitch : drawPitch
+		pause : pause
 	}
 
 }());
