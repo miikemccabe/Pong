@@ -5,6 +5,9 @@ function log(msg) {
 }
 
 
+//-------------------------------------------------------------------------------------------
+
+
 //	This class will be the base class for CanvasView, Collision Detector
 //	and any other objects that need the Observer pattern
 
@@ -40,6 +43,48 @@ var Observer = function() {
 }
 
 
+//-------------------------------------------------------------------------------------------
+
+
+var CollisionEngine = function() {
+	this.objects = [];
+}
+
+CollisionEngine.prototype.registerObject = function(obj) {
+	var numberOfObjects = this.objects.length;
+	for(var i=0; i<numberOfObjects; i++) {
+		if(obj === this.objects[i]) {
+			log(obj.toString() + " has already been registered");
+			return false;
+		}
+	}
+	this.objects.push(obj);
+	return true;
+};
+
+CollisionEngine.prototype.unregisterObject = function(obj) {
+	var numberOfObjects = this.objects.length;
+	for(var i=0; i<numberOfObjects; i++) {
+		if(obj === this.objects[i]) {
+			return this.objects.splice(i, 1);
+		}
+	}
+};
+
+CollisionEngine.prototype.detectCollision = function() {
+	var numberOfObjects = this.objects.length;
+	for(var i=0; i<numberOfObjects; i++) {
+		for(var j=i+1; j<numberOfObjects; j++) {
+			if(this.objects[i].inRange(this.objects[j])) {
+				this.objects[i].collide(this.objects[j]);
+				this.objects[j].collide(this.objects[i]);
+			}
+		}
+	}
+}
+
+
+//-------------------------------------------------------------------------------------------
 
 
 var CanvasView = function(ctx) {
@@ -56,6 +101,7 @@ var CanvasView = function(ctx) {
 			}
 		}
 		objects.push(obj);
+		return true;
 	};
 	
 	var unregisterObject = function(obj) {
@@ -67,7 +113,7 @@ var CanvasView = function(ctx) {
 		}
 	};
 	
-	var draw = function() {
+	var update = function() {
 		ctx.clearRect(0, 0, ctx.canvas.clientWidth, ctx.canvas.clientHeight);
 		for(var i=0; i<objects.length; i++) {
 			if(objects[i] instanceof Player) {
@@ -114,10 +160,13 @@ var CanvasView = function(ctx) {
 		ctx : ctx,
 		registerObject : registerObject,
 		unregisterObject : unregisterObject,
-		draw : draw
+		update : update
 	};
 	
 }
+
+
+//-------------------------------------------------------------------------------------------
 
 
 var Paddle = function() {
@@ -179,6 +228,8 @@ Paddle.prototype = {
 }
 
 
+//-------------------------------------------------------------------------------------------
+
 
 var KeyboardControls = (function() {
 
@@ -212,14 +263,9 @@ var KeyboardControls = (function() {
 
 
 
+//-------------------------------------------------------------------------------------------
 
-/*
-*	Ball class. Can create a graphical representation of a ball within
-*	the context that is provided to the constructor. Detects collisions
-*	of objects passed in to it's move() method and respond accordingly.
-*
-*	@param	obj		2d context of the game's canvas
-*/
+
 function Ball() {
 	
 	//	Set attributes to sensible defaults
@@ -355,14 +401,11 @@ log("Sparkle");
 
 
 
+//-------------------------------------------------------------------------------------------
+
 
 /*
 *	Player class. Represents a player in the game.
-*
-*	@param	obj				2d context of the game's canvas
-*	@param	string		The name of the player eg. "Player 1"
-*	@param	string		Start position, either 'left' or 'right'
-*	@params	obj				Paramaters for the players Paddle
 */
 function Player(uniqueID, startPos, params) {
 
@@ -404,6 +447,10 @@ Player.prototype = {
 	down : function() {
 		this.paddle.moveDown();
 		return this;
+	},
+	
+	center : function(height) {
+		this.paddle.y = (height / 2) - (this.paddle.getHeight() / 2);
 	},
 	
 	rightAlign : function(x) {
@@ -460,41 +507,9 @@ Player.prototype = {
 
 
 
-var CollisionEngine = function() {
-	this.objects = [];
-}
+//-------------------------------------------------------------------------------------------
 
-CollisionEngine.prototype.registerObject = function(obj) {
-	var numberOfObjects = this.objects.length;
-	for(var i=0; i<numberOfObjects; i++) {
-		if(obj === this.objects[i]) {
-			log(obj.toString() + " has already been registered");
-			return false;
-		}
-	}
-	this.objects.push(obj);
-};
 
-CollisionEngine.prototype.unregisterObject = function(obj) {
-	var numberOfObjects = this.objects.length;
-	for(var i=0; i<numberOfObjects; i++) {
-		if(obj === this.objects[i]) {
-			return this.objects.splice(i, 1);
-		}
-	}
-};
-
-CollisionEngine.prototype.detectCollision = function() {
-	var numberOfObjects = this.objects.length;
-	for(var i=0; i<numberOfObjects; i++) {
-		for(var j=i+1; j<numberOfObjects; j++) {
-			if(this.objects[i].inRange(this.objects[j])) {
-				this.objects[i].collide(this.objects[j]);
-				this.objects[j].collide(this.objects[i]);
-			}
-		}
-	}
-}
 
 var Score = function(ctx) {
 	var ctx = ctx;

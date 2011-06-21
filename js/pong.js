@@ -32,6 +32,8 @@ var Pong = (function() {
 		p1 = new Player(uniqueID("p"));
 		p2 = new Player(uniqueID("p"));
 		p2.rightAlign(ctx.canvas.clientWidth);
+		p1.center(400);
+		p2.center(400);
 		
 		ball = new Ball();		
 		ball.centralise(ctx.canvas.clientWidth, ctx.canvas.clientHeight);
@@ -41,7 +43,7 @@ var Pong = (function() {
 		view.registerObject(p1);
 		view.registerObject(p2);
 		view.registerObject(ball);
-		view.draw();
+		view.update();
 		
 		collisionEngine = new CollisionEngine();
 		
@@ -89,7 +91,7 @@ var Pong = (function() {
 	var draw = function() {
 		if(running) {
 		
-			view.draw();
+			view.update();
 			
 			if(controls.p1_up && !controls.p1_down) {
 				p1.up();
