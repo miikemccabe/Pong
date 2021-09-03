@@ -1,4 +1,4 @@
-This project us purely an exercise for me to learn OOP
+This project is purely an exercise for me to learn OOP
 
 To do:
         - Look at using inheritance for the Collision Detection and View objects
